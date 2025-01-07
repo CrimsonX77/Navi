@@ -1,0 +1,21 @@
+# Function to fetch Google Drive folder contents
+def fetch_google_drive_folders(credentials_path, folder_id="root"):
+    SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
+
+    # Authenticate and build the service
+    flow = InstalledAppFlow.from_client_secrets_file(credentials_path, SCOPES)
+    creds = flow.run_local_server(port=0)
+    service = build('drive', 'v3', credentials=creds)
+
+    # Fetch folder contents
+    results = service.files().list(
+        q=f"'{folder_id}' in parents",
+        spaces='drive',
+        fields="nextPageToken, files(id, name, mimeType)"
+    ).execute()
+
+    items = results.get('files', [])
+    print_folder_contents(folder_id, items)
+
+# Replace 'credentials_path' with the path to your Google credentials JSON file
+fetch_google_drive_folders(credentials_path="path_to_credentials.json")
